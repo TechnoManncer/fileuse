@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<!-- saved from url=(0097)file:///C:/Users/Munderwood/OneDrive%20-%20Sierra%20Nevada%20Construction,%20Inc/Desktop/SNC.HTML -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <!-- Essential for mobile responsiveness and preventing zooming on inputs -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- iOS Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SNC Contacts">
+    <title>SNC Address Book</title>
+
+    <!-- Embedded App Icon (SNC Logo on Orange Background) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 512 512&#39; style=&#39;background-color:orange&#39;%3E%3Ctext x=&#39;50%25&#39; y=&#39;50%25&#39; dy=&#39;.3em&#39; fill=&#39;white&#39; font-size=&#39;140&#39; text-anchor=&#39;middle&#39; font-family=&#39;Arial, sans-serif&#39; font-weight=&#39;bold&#39;%3ESNC%3C/text%3E%3C/svg%3E">
+
+    <style>
+        :root {
+            --primary-color: #ff9800; /* Orange */
+            --primary-dark: #e68900;
+            --secondary-color: #007bff; /* Blue */
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            /* Padding for safe area on iPhone X/11/12/13+ */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        h2 {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+            font-weight: 700;
+        }
+
+        /* Input Styling */
+        #searchInput {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 12px; /* Softer corners like iOS */
+            font-size: 16px; /* Prevents auto-zoom on iOS */
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            appearance: none; /* Removes default iOS styling */
+        }
+
+        /* Upload & Action Section */
+        .controls-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            margin-bottom: 15px;
+        }
+        
+        .file-input-wrapper label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Button Styling */
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+            /* Better touch target */
+            min-height: 44px; 
+        }
+
+        .export-button {
+            background-color: #28a745;
+            color: white;
+        }
+        .export-selected-button {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .print-button {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .install-help-button {
+            background-color: #6c757d;
+            color: white;
+            grid-column: span 2; /* Full width */
+        }
+
+        button:active {
+            opacity: 0.8;
+        }
+
+        /* Row Action Button */
+        .row-export-button {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        /* Table Styling */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            /* Constrain height to make vertical sticky header work well */
+            max-height: 70vh; 
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate; /* Required for sticky headers in some browsers */
+            border-spacing: 0;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap; /* Keeps rows readable on mobile */
+        }
+
+        /* Sticky Header */
+        thead th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 600;
+        }
+        
+        /* Clickable Headers */
+        th.sortable-header {
+            cursor: pointer;
+        }
+        th.sortable-header:active {
+            background-color: var(--primary-dark);
+        }
+
+        /* Checkbox Column */
+        th:first-child, td:first-child {
+            text-align: center;
+            padding: 0 10px;
+            position: sticky;
+            left: 0;
+            background-color: inherit; /* Keeps row color */
+            z-index: 5;
+        }
+        /* Fix z-index for the top-left corner cell */
+        thead th:first-child {
+            z-index: 15;
+        }
+
+        /* Links */
+        td a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.8em;
+            padding-bottom: 20px;
+        }
+
+        /* Install Guide Modal */
+        #installGuide {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        #installGuide h3 { margin-top: 0; }
+        #installGuide ol { padding-left: 20px; }
+
+        /* --- Print Styles --- */
+        @media print {
+            body { margin: 0; padding: 0; background: white; }
+            h2 { color: black; }
+            .controls-container, #searchInput, #installGuide { display: none; }
+            .table-container { overflow: visible; max-height: none; box-shadow: none; }
+            table { border: 1px solid #000; }
+            th { background-color: #ddd !important; color: black !important; position: static; }
+            td { border: 1px solid #ccc; white-space: normal; }
+            th:first-child, td:first-child, th:last-child, td:last-child { display: none; } /* Hide checkbox & export */
+            a { text-decoration: none !important; color: black !important; }
+            tbody tr.hide-on-print { display: none !important; }
+        }
+
+        /* Mobile Tweaks */
+        @media (max-width: 600px) {
+            .action-buttons {
+                grid-template-columns: 1fr; /* 1 column on small screens */
+            }
+            .install-help-button {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>SNC Address Book</h2>
+
+    <!-- Install Guide (Hidden by default) -->
+    <div id="installGuide" style="display: none;">
+        <h3>📲 How to Install on iPhone</h3>
+        <ol>
+            <li>Tap the <strong>Share</strong> button (square with up arrow) at the bottom of Safari.</li>
+            <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+            <li>Tap <strong>Add</strong>.</li>
+        </ol>
+        <button onclick="document.getElementById(&#39;installGuide&#39;).style.display=&#39;none&#39;" style="background:#333; color:fff; width:100%;">Close</button>
+    </div>
+
+    <div class="controls-container">
+        <div class="file-input-wrapper">
+            <label for="csvFile">📂 Import CSV File:</label>
+            <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload(event)">
+        </div>
+        
+        <div class="action-buttons">
+            <button class="export-selected-button" onclick="exportSelectedVCards()">Export Selected</button>
+            <button class="export-button" onclick="exportAllVCards()">Export All</button>
+            <button class="print-selected-button" style="background-color:#6610f2; color:white;" onclick="printSelected()">Print Selected</button>
+            <button class="print-button" onclick="printAll()">Print All</button>
+            <button class="install-help-button" onclick="document.getElementById(&#39;installGuide&#39;).style.display=&#39;block&#39;">📱 Install App</button>
+        </div>
+    </div>
+
+    <input type="text" id="searchInput" onkeyup="searchContacts()" placeholder="🔍 Search contacts...">
+
+    <div class="table-container">
+        <table id="contactTable">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAllCheckbox" onclick="toggleAllCheckboxes(this)"></th>
+                    <th class="sortable-header" onclick="sortTable(1)">First Name <span></span></th>
+                    <th class="sortable-header" onclick="sortTable(2)">Last Name <span></span></th>
+                    <th class="sortable-header" onclick="sortTable(3)">Company <span></span></th>
+                    <th class="sortable-header" onclick="sortTable(4)">Job Title <span></span></th>
+                    <th class="sortable-header" onclick="sortTable(5)">Desk Phone <span></span></th>
+                    <th class="sortable-header" onclick="sortTable(6)">EXT <span></span></th>
+                    <th class="sortable-header" onclick="sortTable(7)">Mobile Phone <span></span></th>
+                    <th class="sortable-header" onclick="sortTable(8)">E-Mail <span></span></th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="contactTableBody"><tr><td><input type="checkbox" class="row-checkbox"></td><td>Adam</td><td>Denetsosie</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7754334563">(775) 433-4563</a></td><td><a href="mailto:adenetsosie@snc.biz">adenetsosie@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Adam</td><td>Hardman</td><td>Sierra Nevada Construction</td><td>Shop Laborer</td><td></td><td></td><td><a href="tel:7752251137">(775) 225-1137</a></td><td><a href="mailto:ahardman@snc.biz">ahardman@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Adrian</td><td>Rodriguez Ruiz</td><td>Sierra Nevada Construction</td><td>Laborer Foreman</td><td></td><td></td><td><a href="tel:7758955051">(775) 895-5051</a></td><td><a href="mailto:arodriguez ruiz@snc.biz">arodriguez ruiz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Alejandro</td><td>Villegas Quintero</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755649314">(775) 564-9314</a></td><td><a href="mailto:aquintero@snc.biz">aquintero@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Alex</td><td>Aguirre</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7753998016">(775) 399-8016</a></td><td><a href="mailto:aaguirre@snc.biz">aaguirre@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Alex</td><td>Faust</td><td>Sierra Nevada Construction</td><td>Senior VP Pavement Preservation</td><td><a href="tel:7752364350">(775) 236-4350</a></td><td>2150</td><td><a href="tel:7756918383">(775) 691-8383</a></td><td><a href="mailto:afaust@snc.biz">afaust@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Alyssa</td><td>McDonough</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7752232957">(775) 223-2957</a></td><td><a href="mailto:amcdonough@snc.biz">amcdonough@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Andrew</td><td>Johnson</td><td>Sierra Nevada Construction</td><td>Site Safety Coordinator</td><td></td><td></td><td><a href="tel:7758993089">(775) 899-3089</a></td><td><a href="mailto:ajohnson@snc.biz">ajohnson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Andrew</td><td>Larned</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7758702657">(775) 870-2657</a></td><td><a href="mailto:alarned@snc.biz">alarned@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Andrew</td><td>Manzini</td><td>Sierra Nevada Construction</td><td>Equipment Manager</td><td><a href="tel:7752364359">(775) 236-4359</a></td><td>2759</td><td><a href="tel:7755128437">(775) 512-8437</a></td><td><a href="mailto:amanzini@snc.biz">amanzini@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Angel</td><td>Saldana</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755642946">(775) 564-2946</a></td><td><a href="mailto:asaldana@snc.biz">asaldana@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Angela</td><td>Leone</td><td>Sierra Nevada Construction</td><td>ACMD &amp; Concrete Administrator</td><td><a href="tel:7752842612">(775) 284-2612</a></td><td>2129</td><td></td><td><a href="mailto:aleone@snc.biz">aleone@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Antonio</td><td>Monachelli</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7758703186">(775) 870-3186</a></td><td><a href="mailto:amonachelli@snc.biz">amonachelli@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Armando</td><td>Calzada</td><td>Sierra Nevada Construction</td><td>Concrete Foreman</td><td></td><td></td><td><a href="tel:7755609304">(775) 560-9304</a></td><td><a href="mailto:acalzada@snc.biz">acalzada@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Ashlee</td><td>Jackson</td><td>Sierra Nevada Construction</td><td>HR Assistant/Safety Admin</td><td><a href="tel:7752840429">(775) 284-0429</a></td><td>2783</td><td><a href="tel:7755128828">(775) 512-8828</a></td><td><a href="mailto:ajackson@snc.biz">ajackson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Austin</td><td>Medina</td><td>Sierra Nevada Construction</td><td>Truck Driver</td><td></td><td></td><td><a href="tel:7754328349">(775) 432-8349</a></td><td><a href="mailto:amedina@snc.biz">amedina@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Bobby</td><td>Thoms</td><td>Sierra Nevada Construction</td><td>Dispatcher</td><td><a href="tel:7752840450">(775) 284-0450</a></td><td>2143</td><td><a href="tel:7758992614">(775) 899-2614</a></td><td><a href="mailto:bthoms@snc.biz">bthoms@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Brandon</td><td>MacFarlane</td><td>Sierra Nevada Construction</td><td>Paving Foreman</td><td></td><td></td><td><a href="tel:7753000757">(775) 300-0757</a></td><td><a href="mailto:bmacfarlane@snc.biz">bmacfarlane@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Brandon</td><td>Schultz</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td></td><td></td><td><a href="tel:7756222070">(775) 622-2070</a></td><td><a href="mailto:bschultz@snc.biz">bschultz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Brandon</td><td>Warshawsky</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755649895">(775) 564-9895</a></td><td><a href="mailto:bwarshawsky@snc.biz">bwarshawsky@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Bret</td><td>Koprowicz</td><td>Sierra Nevada Construction</td><td>Site Safety Coordinator</td><td></td><td></td><td><a href="tel:7758993707">(775) 899-3707</a></td><td><a href="mailto:bkoprowicz@snc.biz">bkoprowicz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Bret</td><td>Weyrick</td><td>Sierra Nevada Construction</td><td>Operator</td><td></td><td></td><td><a href="tel:7757990694">(775) 799-0694</a></td><td><a href="mailto:bweyrick@snc.biz">bweyrick@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Brian</td><td>Counce</td><td>Sierra Nevada Construction</td><td>Grade Setter</td><td></td><td></td><td><a href="tel:7756754144">(775) 675-4144</a></td><td><a href="mailto:bcounce@snc.biz">bcounce@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Brian</td><td>Piccolo</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7757990379">(775) 799-0379</a></td><td><a href="mailto:bpiccolo@snc.biz">bpiccolo@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Bryan</td><td>Holt</td><td>Sierra Nevada Construction</td><td>Controller</td><td><a href="tel:7752840439">(775) 284-0439</a></td><td>2130</td><td><a href="tel:7756916919">(775) 691-6919</a></td><td><a href="mailto:bholt@snc.biz">bholt@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Carlos</td><td>Castanaza-Najera</td><td>Sierra Nevada Construction</td><td>Sweeper Driver</td><td></td><td></td><td><a href="tel:7755120952">(775) 512-0952</a></td><td><a href="mailto:ccastanaza-najera@snc.biz">ccastanaza-najera@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Carlos</td><td>Guerrero</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td><a href="tel:7752364343">(775) 236-4343</a></td><td>2743</td><td><a href="tel:7759007001">(775) 900-7001</a></td><td><a href="mailto:cguerrero@snc.biz">cguerrero@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Casey</td><td>Goodfellow</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7755643090">(775) 564-3090</a></td><td><a href="mailto:cgoodfellow@snc.biz">cgoodfellow@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Casey</td><td>Merrill</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7758992057">(775) 899-2057</a></td><td><a href="mailto:cmerrill@snc.biz">cmerrill@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Chase</td><td>Hyde</td><td>Sierra Nevada Construction</td><td>Leadman</td><td></td><td></td><td><a href="tel:7755643125">(775) 564-3125</a></td><td><a href="mailto:chyde@snc.biz">chyde@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Chris</td><td>Coulter</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7758993450">(775) 899-3450</a></td><td><a href="mailto:ccoulter@snc.biz">ccoulter@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Chris</td><td>Franklin</td><td>Sierra Nevada Construction</td><td>Small Tools Coordinator</td><td><a href="tel:7752364331">(775) 236-4331</a></td><td>2731</td><td><a href="tel:7754338905">(775) 433-8905</a></td><td><a href="mailto:cfranklin@snc.biz">cfranklin@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Chris</td><td>Hines</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7754843167">(775) 484-3167</a></td><td><a href="mailto:chines@snc.biz">chines@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Chris</td><td>Lopez</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7755120777">(775) 512-0777</a></td><td><a href="mailto:clopez@snc.biz">clopez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Cierra</td><td>Veldhuizen</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td><a href="tel:7752364364">(775) 236-4364</a></td><td>2764</td><td><a href="tel:7754447931">(775) 444-7931</a></td><td><a href="mailto:cveldhuizen@snc.biz">cveldhuizen@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Claire</td><td>Schreckenberger</td><td>Sierra Nevada Construction</td><td>Estimator/Project Manager</td><td><a href="tel:7752364326">(775) 236-4326</a></td><td>2726</td><td><a href="tel:7753600161">(775) 360-0161</a></td><td><a href="mailto:cschreckenberger@snc.biz">cschreckenberger@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Clay</td><td>Gillespie</td><td>Sierra Nevada Construction</td><td>Concrete Project Manager</td><td><a href="tel:7752364342">(775) 236-4342</a></td><td>2752</td><td><a href="tel:7758952299">(775) 895-2299</a></td><td><a href="mailto:cgillespie@snc.biz">cgillespie@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Clayton</td><td>Madole</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7756225457">(775) 622-5457</a></td><td><a href="mailto:cmadole@snc.biz">cmadole@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Cliff</td><td>Helmholz</td><td>Sierra Nevada Construction</td><td>Estimator</td><td><a href="tel:7752364341">(775) 236-4341</a></td><td>2141</td><td><a href="tel:7758951615">(775) 895-1615</a></td><td><a href="mailto:chelmholz@snc.biz">chelmholz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Cody</td><td>Ryan</td><td>Sierra Nevada Construction</td><td>Traffic Control Superintendent</td><td></td><td></td><td><a href="tel:7758425882">(775) 842-5882</a></td><td><a href="mailto:cryan@snc.biz">cryan@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Colton</td><td>Feickert</td><td>Sierra Nevada Construction</td><td>Field Engineer</td><td></td><td></td><td><a href="tel:7756754148">(775) 675-4148</a></td><td><a href="mailto:cfeickert@snc.biz">cfeickert@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Connor</td><td>Galvan</td><td>Sierra Nevada Construction</td><td>Project Engineer - Intern</td><td><a href="tel:7752364376">(775) 236-4376</a></td><td>2776</td><td><a href="tel:7755647151">(775) 564-7151</a></td><td><a href="mailto:cgalvan@snc.biz">cgalvan@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Corey</td><td>Colavito</td><td>Sierra Nevada Construction</td><td>Leadman</td><td></td><td></td><td><a href="tel:7755644358">(775) 564-4358</a></td><td><a href="mailto:ccolavito@snc.biz">ccolavito@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Corey</td><td>Wotring</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7753003768">(775) 300-3768</a></td><td><a href="mailto:cwotring@snc.biz">cwotring@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Coty</td><td>Loudenburg</td><td>Sierra Nevada Construction</td><td>Sweeper Driver</td><td></td><td></td><td><a href="tel:7757990018">(775) 799-0018</a></td><td><a href="mailto:cloudenburg@snc.biz">cloudenburg@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Craig</td><td>Holt</td><td>Sierra Nevada Construction</td><td>Owner</td><td><a href="tel:7752364311">(775) 236-4311</a></td><td>2111</td><td><a href="tel:7756911303">(775) 691-1303</a></td><td><a href="mailto:cholt@snc.biz">cholt@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Cristian</td><td>Mora</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7753990384">(775) 399-0384</a></td><td><a href="mailto:cmora@snc.biz">cmora@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Curtis</td><td>Kibbe</td><td>Sierra Nevada Construction</td><td>Working Foreman</td><td><a href="tel:7752364367">(775) 236-4367</a></td><td>2767</td><td><a href="tel:7756868361">(775) 686-8361</a></td><td><a href="mailto:ckibbe@snc.biz">ckibbe@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Damian</td><td>Orozco</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td><a href="tel:7752364336">(775) 236-4336</a></td><td>2736</td><td><a href="tel:7753992575">(775) 399-2575</a></td><td><a href="mailto:dorozco@snc.biz">dorozco@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Dan</td><td>LeBlanc</td><td>Sierra Nevada Construction</td><td>Senior VP Civil Construction</td><td><a href="tel:7752364338">(775) 236-4338</a></td><td>2139</td><td><a href="tel:7758579107">(775) 857-9107</a></td><td><a href="mailto:dleblanc@snc.biz">dleblanc@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Daniel</td><td>Arias</td><td>Sierra Nevada Construction</td><td>Estimator/Project Manager</td><td><a href="tel:7752364302">(775) 236-4302</a></td><td>2732</td><td><a href="tel:7753863974">(775) 386-3974</a></td><td><a href="mailto:darias@snc.biz">darias@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Daniel</td><td>Castillo</td><td>Sierra Nevada Construction</td><td>Truck Driver</td><td></td><td></td><td><a href="tel:7757101236">(775) 710-1236</a></td><td><a href="mailto:dcastillo@snc.biz">dcastillo@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Darcy</td><td>Carpenter</td><td>Sierra Nevada Construction</td><td>Contracts Administrator</td><td><a href="tel:7752364352">(775) 236-4352</a></td><td>2152</td><td></td><td><a href="mailto:dcarpenter@snc.biz">dcarpenter@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Dave</td><td>Duggins</td><td>Sierra Nevada Construction</td><td>General Superintendent (ACMD)</td><td><a href="tel:7752364319">(775) 236-4319</a></td><td>2119</td><td><a href="tel:7753847607">(775) 384-7607</a></td><td><a href="mailto:dduggins@snc.biz">dduggins@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>David</td><td>Barlow</td><td>Sierra Nevada Construction</td><td>Project Manager</td><td></td><td></td><td><a href="tel:7758993643">(775) 899-3643</a></td><td><a href="mailto:dbarlow@snc.biz">dbarlow@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Denise</td><td>Tyree</td><td>Sierra Nevada Construction</td><td>Dispatch Admin</td><td><a href="tel:7752847217">(775) 284-7217</a></td><td>2115</td><td></td><td><a href="mailto:dtyree@snc.biz">dtyree@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Dennis</td><td>Pearson</td><td>Sierra Nevada Construction</td><td>Site Safety Coordinator</td><td></td><td></td><td><a href="tel:7758993643">(775) 899-3643</a></td><td><a href="mailto:dpearson@snc.biz">dpearson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Dillon</td><td>Harrington</td><td>Sierra Nevada Construction</td><td>Shop Apprentice</td><td></td><td></td><td><a href="tel:7755278031">(775) 527-8031</a></td><td><a href="mailto:dharrington@snc.biz">dharrington@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Dispatch</td><td></td><td>Sierra Nevada Construction</td><td>Dispatch Mobile Phone</td><td><a href="tel:7752840450">(775) 284-0450</a></td><td></td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Domenic</td><td>Marconato</td><td>Sierra Nevada Construction</td><td>Intern</td><td></td><td></td><td><a href="tel:7758955331">(775) 895-5331</a></td><td><a href="mailto:dmarconato@snc.biz">dmarconato@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Doug</td><td>Whipple</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td></td><td></td><td><a href="tel:7753994013">(775) 399-4013</a></td><td><a href="mailto:dwhipple@snc.biz">dwhipple@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Drew</td><td>Scolari</td><td>Sierra Nevada Construction</td><td>Project Engineering Intern</td><td><a href="tel:7752364381">(775) 236-4381</a></td><td>2781</td><td><a href="tel:7757101386">(775) 710-1386</a></td><td><a href="mailto:dscolari@snc.biz">dscolari@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Dylan</td><td>Ernst</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755317284">(775) 531-7284</a></td><td><a href="mailto:dernst@snc.biz">dernst@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Eduardo</td><td>Martinez-Osuna</td><td>Sierra Nevada Construction</td><td>Leadman</td><td></td><td></td><td><a href="tel:7755120202">(775) 512-0202</a></td><td><a href="mailto:eosuna@snc.biz">eosuna@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Edward</td><td>Broberg</td><td>Sierra Nevada Construction</td><td>Site Safety Coordinator</td><td></td><td></td><td><a href="tel:7758993089">(775) 899-3089</a></td><td><a href="mailto:ebroberg@snc.biz">ebroberg@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Emma</td><td>Crossman</td><td>Sierra Nevada Construction</td><td>Sr. Estimator/Project Manager</td><td><a href="tel:7752364313">(775) 236-4313</a></td><td>2113</td><td><a href="tel:7754328219">(775) 432-8219</a></td><td><a href="mailto:ecrossman@snc.biz">ecrossman@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Eric</td><td>Saucedo</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7754445235">(775) 444-5235</a></td><td><a href="mailto:esaucedo@snc.biz">esaucedo@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Eric</td><td>Schultz</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7754333068">(775) 433-3068</a></td><td><a href="mailto:eschultz@snc.biz">eschultz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Estuart</td><td>Martinez</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7756909883">(775) 690-9883</a></td><td><a href="mailto:emartinez@snc.biz">emartinez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Evan</td><td>Erickson</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7755643090">(775) 564-3090</a></td><td><a href="mailto:eerickson@snc.biz">eerickson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Fred</td><td>Rogne</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755648335">(775) 564-8335</a></td><td><a href="mailto:frogne@snc.biz">frogne@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Gabriella</td><td>Chavez</td><td>Sierra Nevada Construction</td><td>Traffic Control Technician</td><td></td><td></td><td><a href="tel:7758956423">(775) 895-6423</a></td><td><a href="mailto:gchavez@snc.biz">gchavez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Gary</td><td>Houser</td><td>Sierra Nevada Construction</td><td>Oiler</td><td></td><td></td><td><a href="tel:7752244454">(775) 224-4454</a></td><td><a href="mailto:ghouser@snc.biz">ghouser@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Gerardo</td><td>Simental</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7754448666">(775) 444-8666</a></td><td><a href="mailto:gsimental@snc.biz">gsimental@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Greg</td><td>Dougherty</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7758426296">(775) 842-6296</a></td><td><a href="mailto:gdougherty@snc.biz">gdougherty@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Hollis</td><td>Hood</td><td>Sierra Nevada Construction</td><td>Sweeper Driver</td><td></td><td></td><td><a href="tel:7755129729">(775) 512-9729</a></td><td><a href="mailto:hhood@snc.biz">hhood@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Hunter</td><td>Powers</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7753005131">(775) 300-5131</a></td><td><a href="mailto:hpowers@snc.biz">hpowers@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Ian</td><td>Morell</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7758700108">(775) 870-0108</a></td><td><a href="mailto:imorell@snc.biz">imorell@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Izzy</td><td>Chavez Gallegos</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7757501955">(775) 750-1955</a></td><td><a href="mailto:ichavez@snc.biz">ichavez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jake</td><td>McNeill</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td></td><td></td><td><a href="tel:7758992625">(775) 899-2625</a></td><td><a href="mailto:jmcneill@snc.biz">jmcneill@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jan</td><td>Pledger</td><td>Sierra Nevada Construction</td><td>Carpenter Foreman</td><td></td><td></td><td><a href="tel:7755649300">(775) 564-9300</a></td><td><a href="mailto:jpledger@snc.biz">jpledger@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jason</td><td>Caufield</td><td>Sierra Nevada Construction</td><td>Grade Setter</td><td></td><td></td><td><a href="tel:7755649307">(775) 564-9307</a></td><td><a href="mailto:jcaufield@snc.biz">jcaufield@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jason</td><td>Chapman</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755600593">(775) 560-0593</a></td><td><a href="mailto:jchapman@snc.biz">jchapman@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jason</td><td>Lopez</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7757414674">(775) 741-4674</a></td><td><a href="mailto:jlopez@snc.biz">jlopez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Javier</td><td>Cerda</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7756900011">(775) 690-0011</a></td><td><a href="mailto:jcerda@snc.biz">jcerda@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jay</td><td>Heying</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7752768332">(775) 276-8332</a></td><td><a href="mailto:jheying@snc.biz">jheying@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>JC</td><td>Wellman</td><td>Sierra Nevada Construction</td><td>Sr. Estimator/Project Manager</td><td><a href="tel:7753520510">(775) 352-0510</a></td><td>2131</td><td><a href="tel:7758700213">(775) 870-0213</a></td><td><a href="mailto:jwellman@snc.biz">jwellman@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jeff</td><td>McCargar</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td></td><td></td><td><a href="tel:7756908939">(775) 690-8939</a></td><td><a href="mailto:jmccargar@snc.biz">jmccargar@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jeff</td><td>Ruston</td><td>Sierra Nevada Construction</td><td>Sales/Project Manager</td><td><a href="tel:7752364300">(775) 236-4300</a></td><td>2100</td><td><a href="tel:7756917394">(775) 691-7394</a></td><td><a href="mailto:jruston@snc.biz">jruston@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jeff</td><td>Stone</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755300826">(775) 530-0826</a></td><td><a href="mailto:jstone@snc.biz">jstone@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jeff</td><td>Stone</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7754339581">(775) 433-9581</a></td><td><a href="mailto:jstone@snc.biz">jstone@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jennifer</td><td>Sandstrom</td><td>Sierra Nevada Construction</td><td>Project Office Administrator</td><td><a href="tel:7752364360">(775) 236-4360</a></td><td>2750</td><td><a href="tel:7755129732">(775) 512-9732</a></td><td><a href="mailto:jsandstrom@snc.biz">jsandstrom@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jeremiah</td><td>Merritt</td><td>Sierra Nevada Construction</td><td>Safety &amp; Risk Director</td><td><a href="tel:7753520512">(775) 352-0512</a></td><td>2138</td><td><a href="tel:9168250277">(916) 825-0277</a></td><td><a href="mailto:jmerritt@snc.biz">jmerritt@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jeremy</td><td>Wilson</td><td>Sierra Nevada Construction</td><td>Truck Driver</td><td></td><td></td><td><a href="tel:7756868989">(775) 686-8989</a></td><td><a href="mailto:jwilson@snc.biz">jwilson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jesse</td><td>Maxim</td><td>Sierra Nevada Construction</td><td>Project Manager</td><td><a href="tel:7752364386">(775) 236-4386</a></td><td>2786</td><td><a href="tel:7752330647">(775) 233-0647</a></td><td><a href="mailto:jmaxim@snc.biz">jmaxim@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joe</td><td>Betancourt</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td><a href="tel:7752364314">(775) 236-4314</a></td><td>2114</td><td><a href="tel:7752258979">(775) 225-8979</a></td><td><a href="mailto:jbetancourt@snc.biz">jbetancourt@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joe</td><td>Luia</td><td>Sierra Nevada Construction</td><td>Project Manager</td><td></td><td></td><td><a href="tel:7755649305">(775) 564-9305</a></td><td><a href="mailto:jluia@snc.biz">jluia@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joe</td><td>Ramirez</td><td>Sierra Nevada Construction</td><td>Site Safety Manager</td><td></td><td></td><td><a href="tel:7755649319">(775) 564-9319</a></td><td><a href="mailto:jramirez@snc.biz">jramirez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joe</td><td>Schneiderwind</td><td>Sierra Nevada Construction</td><td>Field Technologies Specialist</td><td><a href="tel:7752364348">(775) 236-4348</a></td><td>2778</td><td><a href="tel:7753003095">(775) 300-3095</a></td><td><a href="mailto:jschneiderwind@snc.biz">jschneiderwind@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joel</td><td>Jayme</td><td>Sierra Nevada Construction</td><td>Traffic Coordinator/Project Manager</td><td><a href="tel:7752364372">(775) 236-4372</a></td><td>2772</td><td><a href="tel:7753844163">(775) 384-4163</a></td><td><a href="mailto:jjayme@snc.biz">jjayme@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joey</td><td>Griff</td><td>Sierra Nevada Construction</td><td>Truck Driver</td><td></td><td></td><td><a href="tel:7753001744">(775) 300-1744</a></td><td><a href="mailto:jgriff@snc.biz">jgriff@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>John</td><td>Fralick</td><td>Sierra Nevada Construction</td><td>Paving Manager</td><td><a href="tel:7752364347">(775) 236-4347</a></td><td>2147</td><td><a href="tel:7757713124">(775) 771-3124</a></td><td><a href="mailto:jfralick@snc.biz">jfralick@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>John</td><td>Garrett</td><td>Sierra Nevada Construction</td><td>Project Manager</td><td><a href="tel:7752364361">(775) 236-4361</a></td><td>2721</td><td><a href="tel:7755645712">(775) 564-5712</a></td><td><a href="mailto:jgarrett@snc.biz">jgarrett@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>John</td><td>Howard</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td></td><td></td><td><a href="tel:7758426089">(775) 842-6089</a></td><td><a href="mailto:jhoward@snc.biz">jhoward@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jonathan</td><td>Garcia Cruz</td><td>Sierra Nevada Construction</td><td>Laborer Foreman</td><td></td><td></td><td><a href="tel:7755644358">(775) 564-4358</a></td><td><a href="mailto:jgarcia@snc.biz">jgarcia@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jonathan</td><td>Naus</td><td>Sierra Nevada Construction</td><td>Oiler</td><td></td><td></td><td><a href="tel:7752237217">(775) 223-7217</a></td><td><a href="mailto:jnaus@snc.biz">jnaus@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jorge</td><td>Lemus</td><td>Sierra Nevada Construction</td><td>Foreman - Striping</td><td></td><td></td><td><a href="tel:7754339827">(775) 433-9827</a></td><td><a href="mailto:jlemus@snc.biz">jlemus@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jose</td><td>Amaro</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7758950650">(775) 895-0650</a></td><td><a href="mailto:jamaro@snc.biz">jamaro@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jose</td><td>Cruz Gonzalez</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7756754145">(775) 675-4145</a></td><td><a href="mailto:Jcruz@snc.biz">Jcruz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jose</td><td>Lemus</td><td>Sierra Nevada Construction</td><td>Foreman - Striping</td><td></td><td></td><td><a href="tel:7754335994">(775) 433-5994</a></td><td><a href="mailto:jlemus@snc.biz">jlemus@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Jose</td><td>Reyes Barajas</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7754448671">(775) 444-8671</a></td><td><a href="mailto:Jreyesbarajas@snc.biz">Jreyesbarajas@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joseph</td><td>Mummau</td><td>Sierra Nevada Construction</td><td>Striping Consultant</td><td></td><td></td><td><a href="tel:7754338779">(775) 433-8779</a></td><td><a href="mailto:jmummau@snc.biz">jmummau@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Josh</td><td>Brown</td><td>Sierra Nevada Construction</td><td>Estimator/ Project Engineer</td><td><a href="tel:7752364362">(775) 236-4362</a></td><td>2762</td><td><a href="tel:7752240953">(775) 224-0953</a></td><td><a href="mailto:jbrown@snc.biz">jbrown@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Joshua</td><td>Jenni</td><td>Sierra Nevada Construction</td><td>Concrete Superintendent</td><td><a href="tel:7752364327">(775) 236-4327</a></td><td>2727</td><td><a href="tel:7757415327">(775) 741-5327</a></td><td><a href="mailto:jjenni@snc.biz">jjenni@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Juan</td><td>Aparicio</td><td>Sierra Nevada Construction</td><td>Paving Superintendent</td><td><a href="tel:7752364354">(775) 236-4354</a></td><td>2754</td><td><a href="tel:7756918494">(775) 691-8494</a></td><td><a href="mailto:japaricio@snc.biz">japaricio@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Juan</td><td>Lopez-Arriaga</td><td>Sierra Nevada Construction</td><td>Paving Leadman</td><td></td><td></td><td><a href="tel:7753863101">(775) 386-3101</a></td><td><a href="mailto:jarriaga@snc.biz">jarriaga@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Julio</td><td>Diaz</td><td>Sierra Nevada Construction</td><td>Concrete Foreman</td><td></td><td></td><td><a href="tel:7758959616">(775) 895-9616</a></td><td><a href="mailto:jdiaz@snc.biz">jdiaz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Julio</td><td>Naranjo</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7758425671">(775) 842-5671</a></td><td><a href="mailto:jnaranjo@snc.biz">jnaranjo@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Justen</td><td>Fullerton</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7752770106">(775) 277-0106</a></td><td><a href="mailto:jfullerton@snc.biz">jfullerton@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Justin</td><td>McVay</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td></td><td></td><td><a href="tel:7757413123">(775) 741-3123</a></td><td><a href="mailto:jmcvay@snc.biz">jmcvay@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Justin</td><td>Tenpenny</td><td>Sierra Nevada Construction</td><td>Construction Manager (ACMD)</td><td><a href="tel:7752840408">(775) 284-0408</a></td><td>2133</td><td><a href="tel:7758425847">(775) 842-5847</a></td><td><a href="mailto:jtenpenny@snc.biz">jtenpenny@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Kathleen</td><td>Dimick</td><td>Sierra Nevada Construction</td><td>Certified Payroll Administrator</td><td><a href="tel:7752364380">(775) 236-4380</a></td><td>2780</td><td></td><td><a href="mailto:kdimick@snc.biz">kdimick@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Kenneth</td><td>Viers</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7758994985">(775) 899-4985</a></td><td><a href="mailto:kviers@snc.biz">kviers@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Kevin</td><td>Robertson</td><td>Sierra Nevada Construction</td><td>Owner</td><td><a href="tel:7752364310">(775) 236-4310</a></td><td>2110</td><td><a href="tel:7756911298">(775) 691-1298</a></td><td><a href="mailto:krobertson@snc.biz">krobertson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Kurt</td><td>Zimmer</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7756908971">(775) 690-8971</a></td><td><a href="mailto:kzimmer@snc.biz">kzimmer@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Kyle</td><td>Zimmer</td><td>Sierra Nevada Construction</td><td>Grade Setter</td><td></td><td></td><td><a href="tel:7754840969">(775) 484-0969</a></td><td><a href="mailto:kzimmer@snc.biz">kzimmer@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Laco</td><td>Burciaga</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7756918408">(775) 691-8408</a></td><td><a href="mailto:lburciaga@snc.biz">lburciaga@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Larry</td><td>Ryan</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td><a href="tel:7752364316">(775) 236-4316</a></td><td>2116</td><td><a href="tel:7758424424">(775) 842-4424</a></td><td><a href="mailto:lryan@snc.biz">lryan@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Leandro</td><td>Rico-Nunez</td><td>Sierra Nevada Construction</td><td>Mechanic Apprentice</td><td></td><td></td><td><a href="tel:7758427394">(775) 842-7394</a></td><td><a href="mailto:lrico-nunez@snc.biz">lrico-nunez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Lender</td><td>Aguirre</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td></td><td></td><td><a href="tel:9165328382">(916) 532-8382</a></td><td><a href="mailto:laguirre@snc.biz">laguirre@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Les</td><td>Schellenger</td><td>Sierra Nevada Construction</td><td>Truck Driver</td><td></td><td></td><td><a href="tel:7756868746">(775) 686-8746</a></td><td><a href="mailto:lschellenger@snc.biz">lschellenger@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Levi</td><td>Ball-Bryant</td><td>Sierra Nevada Construction</td><td>Warehouse Laborer</td><td></td><td></td><td><a href="tel:7758994859">(775) 899-4859</a></td><td><a href="mailto:lball-bryant@snc.biz">lball-bryant@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Logan</td><td>Davis</td><td>Sierra Nevada Construction</td><td>Mechanic</td><td></td><td></td><td><a href="tel:7756869209">(775) 686-9209</a></td><td><a href="mailto:ldavis@snc.biz">ldavis@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Marc</td><td>Markwell</td><td>Sierra Nevada Construction</td><td>Senior VP CFO/General Counsel</td><td><a href="tel:7752840452">(775) 284-0452</a></td><td>2120</td><td><a href="tel:7752504275">(775) 250-4275</a></td><td><a href="mailto:mmarkwell@snc.biz">mmarkwell@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Mario</td><td>Ramirez</td><td>Sierra Nevada Construction</td><td>Sweeper Driver</td><td></td><td></td><td><a href="tel:7755649881">(775) 564-9881</a></td><td><a href="mailto:mramirez@snc.biz">mramirez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Mark</td><td>Gordine</td><td>Sierra Nevada Construction</td><td>VP Business Development</td><td><a href="tel:7752364340">(775) 236-4340</a></td><td>2140</td><td><a href="tel:7756911880">(775) 691-1880</a></td><td><a href="mailto:mgordine@snc.biz">mgordine@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Martha</td><td>Medina</td><td>Sierra Nevada Construction</td><td>Estimator</td><td><a href="tel:7752364345">(775) 236-4345</a></td><td>2145</td><td><a href="tel:7756868705">(775) 686-8705</a></td><td><a href="mailto:mmedina@snc.biz">mmedina@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Martin</td><td>Munoz</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7752256953">(775) 225-6953</a></td><td><a href="mailto:mmunoz@snc.biz">mmunoz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Marty</td><td>Kite</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td></td><td></td><td><a href="tel:7755254024">(775) 525-4024</a></td><td><a href="mailto:mkite@snc.biz">mkite@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Max</td><td>Karnuth</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td></td><td></td><td><a href="tel:7756919158">(775) 691-9158</a></td><td><a href="mailto:mkarnuth@snc.biz">mkarnuth@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Melanie</td><td>Steelman</td><td>Sierra Nevada Construction</td><td>Office Manager/Accounts Receivable</td><td><a href="tel:7752840407">(775) 284-0407</a></td><td>2127</td><td></td><td><a href="mailto:msteelman@snc.biz">msteelman@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Michael</td><td>Paquin</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td><a href="tel:7752364307">(775) 236-4307</a></td><td>2737</td><td><a href="tel:7758426392">(775) 842-6392</a></td><td><a href="mailto:mpaquin@snc.biz">mpaquin@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Mike</td><td>Douglas</td><td>Sierra Nevada Construction</td><td>Estimator</td><td><a href="tel:7752364374">(775) 236-4374</a></td><td>2774</td><td><a href="tel:7758952481">(775) 895-2481</a></td><td><a href="mailto:mdouglas@snc.biz">mdouglas@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Mike</td><td>Popejoy</td><td>Sierra Nevada Construction</td><td>Concrete Division Manager</td><td><a href="tel:7752364320">(775) 236-4320</a></td><td>2720</td><td><a href="tel:7756909881">(775) 690-9881</a></td><td><a href="mailto:mpopejoy@snc.biz">mpopejoy@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Mike</td><td>Rooley</td><td>Sierra Nevada Construction</td><td>VP Estimating</td><td><a href="tel:7752364337">(775) 236-4337</a></td><td>2137</td><td><a href="tel:7758426018">(775) 842-6018</a></td><td><a href="mailto:mrooley@snc.biz">mrooley@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Miles</td><td>Herrick</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7757704654">(775) 770-4654</a></td><td><a href="mailto:mherrick@snc.biz">mherrick@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Moe</td><td>Underwood</td><td>Sierra Nevada Construction</td><td>IT Director</td><td><a href="tel:7752218904">(775) 221-8904</a></td><td>2784</td><td><a href="tel:7758959123">(775) 895-9123</a></td><td><a href="mailto:munderwood@snc.biz">munderwood@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Molly</td><td>Reed</td><td>Sierra Nevada Construction</td><td>Project Manager</td><td><a href="tel:7752364387">(775) 236-4387</a></td><td>2787</td><td><a href="tel:7755649827">(775) 564-9827</a></td><td><a href="mailto:mreed@snc.biz">mreed@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Najee</td><td>Stanford</td><td>Sierra Nevada Construction</td><td>Fueler</td><td></td><td></td><td><a href="tel:7754440095">(775) 444-0095</a></td><td><a href="mailto:nstanford@snc.biz">nstanford@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Narciso</td><td>Gonzalez</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7754840966">(775) 484-0966</a></td><td><a href="mailto:ngonzalez@snc.biz">ngonzalez@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Nathaniel</td><td>Johnson</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7756860155">(775) 686-0155</a></td><td><a href="mailto:njohnson@snc.biz">njohnson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Nick</td><td>Bacher</td><td>Sierra Nevada Construction</td><td>Estimator/Project Manager</td><td></td><td></td><td><a href="tel:5304924412">(530) 492-4412</a></td><td><a href="mailto:nbacher@snc.biz">nbacher@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Osvaldo</td><td>Arias</td><td>Sierra Nevada Construction</td><td>Estimator/Project Manager</td><td><a href="tel:7752364330">(775) 236-4330</a></td><td>2740</td><td><a href="tel:7754840615">(775) 484-0615</a></td><td><a href="mailto:oarias@snc.biz">oarias@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Porter</td><td>Rittenhouse</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td></td><td></td><td><a href="tel:7754441397">(775) 444-1397</a></td><td><a href="mailto:prittenhouse@snc.biz">prittenhouse@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Prince</td><td>Preciado-Alcala</td><td>Sierra Nevada Construction</td><td>Shop Laborer</td><td></td><td></td><td><a href="tel:7756225116">(775) 622-5116</a></td><td><a href="mailto:ppreciado-alcala@snc.biz">ppreciado-alcala@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Rachael</td><td>Hunter</td><td>Sierra Nevada Construction</td><td>Lead Payroll Administrator</td><td><a href="tel:7752218901">(775) 221-8901</a></td><td>2738</td><td></td><td><a href="mailto:rhunter@snc.biz">rhunter@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Randy</td><td>tarter</td><td>Sierra Nevada Construction</td><td>Sweeper Driver</td><td></td><td></td><td><a href="tel:7755649878">(775) 564-9878</a></td><td><a href="mailto:rtarter@snc.biz">rtarter@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Raul</td><td>Castillo</td><td>Sierra Nevada Construction</td><td>Concrete Superintendent</td><td><a href="tel:7752364353">(775) 236-4353</a></td><td>2753</td><td><a href="tel:7756222882">(775) 622-2882</a></td><td><a href="mailto:rcastillo@snc.biz">rcastillo@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Rene</td><td>Alfaro</td><td>Sierra Nevada Construction</td><td>Project Engineer</td><td></td><td></td><td><a href="tel:7755649295">(775) 564-9295</a></td><td><a href="mailto:ralfaro@snc.biz">ralfaro@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Reynaldo</td><td>Ruiz</td><td>Sierra Nevada Construction</td><td>Grade Setter</td><td></td><td></td><td><a href="tel:7758956961">(775) 895-6961</a></td><td><a href="mailto:rruiz@snc.biz">rruiz@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Rich</td><td>Cox</td><td>Sierra Nevada Construction</td><td>Superintendent</td><td><a href="tel:7752364377">(775) 236-4377</a></td><td>2777</td><td><a href="tel:7756868833">(775) 686-8833</a></td><td><a href="mailto:rcox@snc.biz">rcox@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Rigo</td><td>Grajeda</td><td>Sierra Nevada Construction</td><td>Concrete Foreman</td><td></td><td></td><td><a href="tel:7758957880">(775) 895-7880</a></td><td><a href="mailto:rgrajeda@snc.biz">rgrajeda@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Robert</td><td>Acton-Thorton</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7758951398">(775) 895-1398</a></td><td><a href="mailto:ractonthorton@snc.biz">ractonthorton@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Ryan</td><td>Elder</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7757412773">(775) 741-2773</a></td><td><a href="mailto:relder@snc.biz">relder@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Sam</td><td>Barnwell</td><td>Sierra Nevada Construction</td><td>Site Safety Coordinator</td><td></td><td></td><td><a href="tel:7755644836">(775) 564-4836</a></td><td><a href="mailto:sbarnwell@snc.biz">sbarnwell@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Samuel</td><td>Kellogg</td><td>Sierra Nevada Construction</td><td>Grade Setter</td><td></td><td></td><td><a href="tel:7755649306">(775) 564-9306</a></td><td><a href="mailto:skellogg@snc.biz">skellogg@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Sarah</td><td>Arms</td><td>Sierra Nevada Construction</td><td>Subcontracts Administrator</td><td><a href="tel:7752218902">(775) 221-8902</a></td><td>2741</td><td></td><td><a href="mailto:sarms@snc.biz">sarms@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Scott</td><td>Hlade</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7752244639">(775) 224-4639</a></td><td><a href="mailto:shlade@snc.biz">shlade@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Sean</td><td>Lewison</td><td>Sierra Nevada Construction</td><td>Truck Driver</td><td></td><td></td><td><a href="tel:7758426047">(775) 842-6047</a></td><td><a href="mailto:slewison@snc.biz">slewison@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Shannon</td><td>Davis</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7753995522">(775) 399-5522</a></td><td><a href="mailto:sdavis@snc.biz">sdavis@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Shelby</td><td>Steffens</td><td>Sierra Nevada Construction</td><td>Safety Administrator &amp; Human Resources Manager</td><td><a href="tel:7752840429">(775) 284-0429</a></td><td>2149</td><td><a href="tel:7752240678">(775) 224-0678</a></td><td><a href="mailto:ssteffens@snc.biz">ssteffens@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Shelby</td><td>Welsh</td><td>Sierra Nevada Construction</td><td>Payroll Administrator</td><td><a href="tel:7752840438">(775) 284-0438</a></td><td>2142</td><td></td><td><a href="mailto:swelsh@snc.biz">swelsh@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Slava</td><td>Russky</td><td>Sierra Nevada Construction</td><td>Estimator/Project Manager</td><td><a href="tel:7752364346">(775) 236-4346</a></td><td>2746</td><td><a href="tel:7752216306">(775) 221-6306</a></td><td><a href="mailto:srussky@snc.biz">srussky@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Sonny</td><td>Williams</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7755301165">(775) 530-1165</a></td><td><a href="mailto:swilliams@snc.biz">swilliams@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>SNC</td><td>Office</td><td>Sierra Nevada Construction</td><td>Headquarters Office</td><td><a href="tel:7753550420">(775) 355-0420</a></td><td></td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tammy</td><td>Roysdon</td><td>Sierra Nevada Construction</td><td>Accounts Payable</td><td><a href="tel:7752840451">(775) 284-0451</a></td><td>2105</td><td></td><td><a href="mailto:troysdon@snc.biz">troysdon@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tanyon</td><td>Daniels</td><td>Sierra Nevada Construction</td><td>Receptionist</td><td><a href="tel:7752364301">(775) 236-4301</a></td><td>2101</td><td></td><td><a href="mailto:tdaniels@snc.biz">tdaniels@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Taskar</td><td>Eason</td><td>Sierra Nevada Construction</td><td>Project Engineer-Intern</td><td><a href="tel:7752364375">(775) 236-4375</a></td><td>2775</td><td><a href="tel:7754446430">(775) 444-6430</a></td><td><a href="mailto:teason@snc.biz">teason@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tate</td><td>Morehead</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7754840979">(775) 484-0979</a></td><td><a href="mailto:tmorehead@snc.biz">tmorehead@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Terry</td><td>Turner</td><td>Sierra Nevada Construction</td><td>Shop Superintendent</td><td><a href="tel:7752364339">(775) 236-4339</a></td><td>2739</td><td><a href="tel:7756226496">(775) 622-6496</a></td><td><a href="mailto:tturner@snc.biz">tturner@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Thomas</td><td>Meadows</td><td>Sierra Nevada Construction</td><td>IT Systems Administrator</td><td><a href="tel:7752840445">(775) 284-0445</a></td><td>2745</td><td><a href="tel:7756754149">(775) 675-4149</a></td><td><a href="mailto:tmeadows@snc.biz">tmeadows@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Thomas</td><td>Ratcliffe</td><td>Sierra Nevada Construction</td><td>Traffic Control Supervisor</td><td></td><td></td><td><a href="tel:7758993870">(775) 899-3870</a></td><td><a href="mailto:tratcliffe@snc.biz">tratcliffe@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tim</td><td>Johnson</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7754328735">(775) 432-8735</a></td><td><a href="mailto:tjohnson@snc.biz">tjohnson@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tim</td><td>Morgan</td><td>Sierra Nevada Construction</td><td>Chief Estimator</td><td><a href="tel:7752364321">(775) 236-4321</a></td><td>2121</td><td><a href="tel:7755309950">(775) 530-9950</a></td><td><a href="mailto:tmorgan@snc.biz">tmorgan@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Timothy</td><td>Ricketts</td><td>Sierra Nevada Construction</td><td>Leadman</td><td></td><td></td><td><a href="tel:7755649300">(775) 564-9300</a></td><td><a href="mailto:tricketts@snc.biz">tricketts@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Timothy</td><td>Trainor</td><td>Sierra Nevada Construction</td><td>Mechanic Apprentice</td><td></td><td></td><td><a href="tel:7754843283">(775) 484-3283</a></td><td><a href="mailto:ttrainor@snc.biz">ttrainor@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tony</td><td>Merrill</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7754325818">(775) 432-5818</a></td><td><a href="mailto:tmerrill@snc.biz">tmerrill@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Trinidy</td><td>Fuhrmann</td><td>Sierra Nevada Construction</td><td>Fleet Supervisor</td><td><a href="tel:7752364312">(775) 236-4312</a></td><td>2112</td><td><a href="tel:7753359238">(775) 335-9238</a></td><td><a href="mailto:tfuhrmann@snc.biz">tfuhrmann@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tyler</td><td>Duran</td><td>Sierra Nevada Construction</td><td>Dispatcher</td><td><a href="tel:7752364324">(775) 236-4324</a></td><td>2124</td><td><a href="tel:7754847762">(775) 484-7762</a></td><td><a href="mailto:tduran@snc.biz">tduran@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Tyler</td><td>Scranton</td><td>Sierra Nevada Construction</td><td>Estimator/Project Manager</td><td><a href="tel:7752364332">(775) 236-4332</a></td><td>2132</td><td><a href="tel:7752762418">(775) 276-2418</a></td><td><a href="mailto:tscranton@snc.biz">tscranton@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>USA</td><td>Notifications</td><td>Sierra Nevada Construction</td><td>Shared Mailbox</td><td></td><td></td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Vince</td><td>Herman</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7758577970">(775) 857-7970</a></td><td><a href="mailto:vherman@snc.biz">vherman@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Will</td><td>Aguirre</td><td>Sierra Nevada Construction</td><td>Foreman</td><td></td><td></td><td><a href="tel:7753991816">(775) 399-1816</a></td><td><a href="mailto:waguirre@snc.biz">waguirre@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Zachary</td><td>Webster</td><td>Sierra Nevada Construction</td><td>Fueler</td><td></td><td></td><td><a href="tel:7755129967">(775) 512-9967</a></td><td><a href="mailto:zwebster@snc.biz">zwebster@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Bid</td><td>2</td><td>Sierra Nevada Construction</td><td></td><td><a href="tel:7752218903">(775) 221-8903</a></td><td>2704</td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Bid</td><td>1</td><td>Sierra Nevada Construction</td><td></td><td><a href="tel:7752364308">(775) 236-4308</a></td><td>2103</td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Bid</td><td>3</td><td>Sierra Nevada Construction</td><td></td><td><a href="tel:7752364328">(775) 236-4328</a></td><td>2128</td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Salomon</td><td>RM</td><td>Sierra Nevada Construction</td><td></td><td><a href="tel:7752364351">(775) 236-4351</a></td><td>2751</td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Salomon</td><td>Reception</td><td>Sierra Nevada Construction</td><td></td><td><a href="tel:7752364309">(775) 236-4309</a></td><td>2749</td><td></td><td></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr><tr><td><input type="checkbox" class="row-checkbox"></td><td>Theresa</td><td>Tarnowski</td><td>Sierra Nevada Construction</td><td>Payroll Administrator</td><td><a href="tel:7752364382">(775) 236-4382</a></td><td>2782</td><td></td><td><a href="mailto:ttarnowski@snc.biz">ttarnowski@snc.biz</a></td><td><button class="row-export-button" onclick="exportVCard(this)">Save</button></td></tr></tbody>
+        </table>
+    </div>
+
+    <footer>
+        Created by Moe
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+    
+    let currentSortColumn = -1;
+    let currentSortDirection = 1;
+
+    function searchContacts() {
+        var input = document.getElementById("searchInput");
+        var filter = input.value.toUpperCase();
+        var table = document.getElementById("contactTable");
+        var tbody = table.getElementsByTagName("tbody")[0];
+        var tr = tbody.getElementsByTagName("tr");
+
+        // Check if table is empty (contains the "No contacts" message)
+        if (tr.length === 1 && tr[0].cells.length > 1) return;
+
+        for (var i = 0; i < tr.length; i++) {
+            var found = false;
+            var td = tr[i].getElementsByTagName("td");
+            for (var j = 1; j < td.length - 1; j++) { 
+                if (td[j]) {
+                    var txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            tr[i].style.display = found ? "" : "none";
+        }
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const contents = e.target.result;
+            const lines = contents.split('\n');
+            const tbody = document.getElementById("contactTableBody");
+            
+            tbody.innerHTML = ""; // Clear rows
+            document.getElementById('selectAllCheckbox').checked = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // CSV Parsing handling quotes
+                const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => 
+                    field.replace(/^"|"$/g, '').trim()
+                );
+                
+                if (i === 0 && columns[0].toLowerCase().includes('first name')) continue;
+
+                if (columns.length === 8) {
+                    const newRow = tbody.insertRow();
+                    
+                    const deskPhone = columns[4] ? columns[4].trim() : '';
+                    const mobilePhone = columns[6] ? columns[6].trim() : '';
+                    const email = columns[7] ? columns[7].trim() : '';
+
+                    newRow.insertCell().innerHTML = '<input type="checkbox" class="row-checkbox">';
+                    newRow.insertCell().textContent = columns[0];
+                    newRow.insertCell().textContent = columns[1];
+                    newRow.insertCell().textContent = columns[2];
+                    newRow.insertCell().textContent = columns[3];
+
+                    // Desk Phone (Direct dial, no extension in link)
+                    const deskCell = newRow.insertCell();
+                    if (deskPhone) {
+                        let deskHref = deskPhone.replace(/[^\d+]/g, '');
+                        deskCell.innerHTML = `<a href="tel:${deskHref}">${deskPhone}</a>`;
+                    } else {
+                        deskCell.textContent = '';
+                    }
+
+                    newRow.insertCell().textContent = columns[5]; // EXT
+
+                    // Mobile Phone
+                    const mobileCell = newRow.insertCell();
+                    if (mobilePhone) {
+                        const mobileHref = mobilePhone.replace(/[^\d+]/g, '');
+                        mobileCell.innerHTML = `<a href="tel:${mobileHref}">${mobilePhone}</a>`;
+                    } else {
+                        mobileCell.textContent = '';
+                    }
+
+                    // Email
+                    const emailCell = newRow.insertCell();
+                    if (email) {
+                        emailCell.innerHTML = `<a href="mailto:${email}">${email}</a>`;
+                    } else {
+                        emailCell.textContent = '';
+                    }
+                    
+                    newRow.insertCell().innerHTML = '<button class="row-export-button" onclick="exportVCard(this)">Save</button>';
+                    
+                }
+            }
+            resetSortIcons();
+            currentSortColumn = -1;
+        };
+        reader.readAsText(file);
+    }
+    
+    function createVCardString(cells) {
+        const deskPhone = cells[4];
+        const businessPhone2 = cells[5]; // EXT mapped to Business 2
+        const mobilePhone = cells[6];
+
+        const vCard = [
+            "BEGIN:VCARD",
+            "VERSION:3.0",
+            `N:${cells[1]};${cells[0]}`,
+            `FN:${cells[0]} ${cells[1]}`,
+            `ORG:${cells[2]}`,
+            `TITLE:${cells[3]}`,
+            (deskPhone ? `TEL;TYPE=WORK,VOICE:${deskPhone}` : ''),
+            (businessPhone2 ? `TEL;TYPE=WORK,VOICE:${businessPhone2}` : ''),
+            (mobilePhone ? `TEL;TYPE=CELL,VOICE:${mobilePhone}` : ''),
+            `EMAIL:${cells[7]}`,
+            "END:VCARD"
+        ];
+        return vCard.filter(line => line && !line.endsWith(':') && !line.endsWith('N:;')).join('\n');
+    }
+
+    function downloadVCF(vcfString, filename) {
+        const blob = new Blob([vcfString], { type: 'text/vcard;charset=utf-8' });
+        // iOS requires the user to 'tap' the link. Triggering click programmatically usually works,
+        // but if it fails, we might need to open in new window.
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportVCard(button) {
+        const row = button.closest('tr');
+        const cells = Array.from(row.getElementsByTagName('td')).map(td => td.textContent).slice(1, -1);
+        const vcfString = createVCardString(cells);
+        downloadVCF(vcfString, `${cells[0]}_${cells[1]}.vcf`);
+    }
+
+    function exportAllVCards() {
+        const tbody = document.getElementById("contactTableBody");
+        const rows = tbody.getElementsByTagName("tr");
+        let allVCFs = "";
+        // Check if empty
+        if (rows.length === 1 && rows[0].cells.length === 1) return alert("No contacts to export.");
+
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].style.display !== 'none') {
+                const cells = Array.from(rows[i].getElementsByTagName('td')).map(td => td.textContent).slice(1, -1);
+                allVCFs += createVCardString(cells) + '\n\n';
+            }
+        }
+        if (allVCFs) downloadVCF(allVCFs, "SNC_Contacts.vcf");
+    }
+
+    function exportSelectedVCards() {
+        const tbody = document.getElementById("contactTableBody");
+        const rows = tbody.getElementsByTagName("tr");
+        let allVCFs = "";
+        let count = 0;
+        
+        for (let i = 0; i < rows.length; i++) {
+            const checkbox = rows[i].querySelector('.row-checkbox');
+            if (checkbox && checkbox.checked && rows[i].style.display !== 'none') {
+                const cells = Array.from(rows[i].getElementsByTagName('td')).map(td => td.textContent).slice(1, -1);
+                allVCFs += createVCardString(cells) + '\n\n';
+                count++;
+            }
+        }
+        if (allVCFs) {
+            downloadVCF(allVCFs, `Selected_Contacts_${count}.vcf`);
+        } else {
+            alert("Please select contacts using the checkboxes first.");
+        }
+    }
+
+    function sortTable(columnIndex) {
+        const realColumnIndex = columnIndex;
+        if (realColumnIndex === currentSortColumn) {
+            currentSortDirection *= -1;
+        } else {
+            currentSortColumn = realColumnIndex;
+            currentSortDirection = 1;
+        }
+
+        const tbody = document.getElementById("contactTableBody");
+        const rowsArray = Array.from(tbody.rows);
+        
+        // Skip sorting if empty message exists
+        if (rowsArray.length === 1 && rowsArray[0].cells.length === 1) return;
+
+        rowsArray.sort((a, b) => {
+            const aText = a.cells[realColumnIndex].textContent.toLowerCase();
+            const bText = b.cells[realColumnIndex].textContent.toLowerCase();
+            return aText.localeCompare(bText) * currentSortDirection;
+        });
+
+        rowsArray.forEach(row => tbody.appendChild(row));
+        updateSortIcons(columnIndex);
+    }
+
+    function updateSortIcons(headerIndex) {
+        const headers = document.querySelectorAll("th.sortable-header");
+        headers.forEach(h => h.querySelector("span").textContent = ""); // Reset
+        
+        // headerIndex-1 because we skip checkbox column in the headers NodeList
+        if (headers[headerIndex - 1]) {
+            headers[headerIndex - 1].querySelector("span").textContent = currentSortDirection === 1 ? ' ▲' : ' ▼';
+        }
+    }
+
+    function toggleAllCheckboxes(source) {
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        checkboxes.forEach(cb => {
+            if (cb.closest('tr').style.display !== 'none') cb.checked = source.checked;
+        });
+    }
+
+    function printSelected() {
+        const rows = document.querySelectorAll("#contactTableBody tr");
+        let hasSelected = false;
+        rows.forEach(row => {
+            const cb = row.querySelector('.row-checkbox');
+            if (cb && cb.checked) {
+                hasSelected = true;
+                row.classList.remove('hide-on-print');
+            } else {
+                row.classList.add('hide-on-print');
+            }
+        });
+
+        if (!hasSelected) return alert("Select contacts to print.");
+        window.print();
+        setTimeout(() => rows.forEach(r => r.classList.remove('hide-on-print')), 500);
+    }
+    
+    function printAll() {
+        const rows = document.querySelectorAll("#contactTableBody tr");
+        rows.forEach(r => r.classList.remove('hide-on-print'));
+        window.print();
+    }
+    
+    </script>
+
+</body></html>
